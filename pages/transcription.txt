@@ -1,0 +1,5 @@
+Speaker1 : Good morning
+Speaker2 : First of all, the meeting is cancelled. Thank you for coming. Goodbye Everyone.
+Speaker1 : Okay
+Speaker3 : By the way, the project is progressing well
+Speaker2 : Nice of you to mention
