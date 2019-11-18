@@ -4,8 +4,13 @@
 
 from pathlib import Path
 from TextClassifier import testModel
+from Qidentifier import QItest
+from shortAnswerChecker import shortAnswer
+from combineQA import combineQA
+from removeNeutral import removeNeutral
 from QA import test as qa
 
+print("Starting the main process")
 trans_path = Path("../pages/transcription.txt")
 f  =  open(trans_path)
 convo = f.readlines()
@@ -30,15 +35,17 @@ print('convo : ',convo)
 
 # function to identify questions
 def isQuestion(sentence):
-    return True
+    return QItest.main(sentence)
 
 # identify short answers
 def isShortAnswer(sentence):
-    return True
+    return shortAnswer.main(sentence)
 
 #removing neutral part of complete AND neutral sentences
 def removeNeutral(sentence):
     print("removing neutral component of sentence")
+    return removeNeutral.main(sentence)
+
 
 def findAnswer(index, question):
     print("finding answer")
@@ -52,7 +59,7 @@ def findAnswer(index, question):
 
 def combineAnswer(question, answer):
     print("Combining answer and question")
-    return "Combined Answer"    #temp
+    return combineQA(question, answer)
 
 def getScore(statement):
     print("calculating statement score")
@@ -101,10 +108,13 @@ max_probs=[]
 for output in sorted_output:
     if  output[2][2]>0.3 and score[2][3]>0.3:
         print("Belong to complete AND neutral sentences")
-        updSent = removeNeutral(convo[score[0]])
-        updated_score = getScore(updSent)
-        if isCompleteSentence(updated_score):
-            finalMinutes.append([output[0],3,output[1]])
+        updSent, flag = removeNeutral(convo[score[0]])
+        if flag==True:
+            updated_score = getScore(updSent)
+            if isCompleteSentence(updated_score):
+                finalMinutes.append([output[0],3,output[1]])
+        else:
+            print("Neutral part not present or cannot be seperated from sentence")
     elif max(score[1])<0.5:
         print("sentence cannot be classified accurately")
     else:

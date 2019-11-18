@@ -1,4 +1,3 @@
-arr=[None, None]
-arr[0]=1
-print(arr)
 
+import os
+os.system('python Test/test3.py')

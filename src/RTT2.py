@@ -203,8 +203,7 @@ def listen_print_loop(responses, stream):
                 f = open("transcription.txt", "w+")
                 f.write(transcript_temp)
                 f.close()
-
-
+                os.system("mainProcess.py")
                 stream.closed = True
                 break
 
