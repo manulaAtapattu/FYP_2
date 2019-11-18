@@ -11,8 +11,8 @@ answer = model.predict(doc,q)
 print(answer['answer'])
 print(answer.keys())
 
-def main(q, doc):
+def main(q, context):
     model = QA('QA/model')
-    answer = model.predict(doc,q)
+    answer = model.predict(context,q)
     return answer
 
