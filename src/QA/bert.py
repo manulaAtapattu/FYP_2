@@ -10,7 +10,7 @@ from pytorch_transformers import (WEIGHTS_NAME, BertConfig,
                                   BertForQuestionAnswering, BertTokenizer)
 from torch.utils.data import DataLoader, SequentialSampler, TensorDataset
 
-from utils import (get_answer, input_to_squad_example,
+from src.QA.utils import (get_answer, input_to_squad_example,
                    squad_examples_to_features, to_list)
 
 RawResult = collections.namedtuple("RawResult",

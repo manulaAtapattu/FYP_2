@@ -8,12 +8,16 @@ def dialogue_act_features(post):
     return features
 
 def main(sentence):
+    #f = open('../src/Qidentifier/statements_classifier.pickle', 'rb')
     f = open('statements_classifier.pickle', 'rb')
     classifier = pickle.load(f)
     f.close()
 
-    result = classifier.classify(dialogue_act_features("Give me an example of a problem you faced on the job"))
+    result = classifier.classify(dialogue_act_features(sentence))
     if result == "whQuestion" or  "ynQuestion":
+        print("Question identified ")
         return True
     else:
         return False
+
+main("Good morning")

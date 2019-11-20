@@ -3,7 +3,7 @@
 
 def main(sentence):
     s_1 = sentence
-    f = open("neutral.txt","r")
+    f = open("../src/removeNeutral/neutral.txt","r")
     arr = f.readlines()
     f.close()
     for i in arr:

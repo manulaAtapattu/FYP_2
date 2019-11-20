@@ -3,12 +3,12 @@
 # final output will be of the minutes
 
 from pathlib import Path
-from TextClassifier import testModel
-from Qidentifier import QItest
-from shortAnswerChecker import shortAnswer
-from combineQA import combineQA
-from removeNeutral import removeNeutral
-from QA import test as qa
+from src.TextClassifier import testModel
+from src.Qidentifier import QItest
+from src.shortAnswerChecker import shortAnswer
+from src.combineQA import combineQA
+from src.removeNeutral import removeNeutral
+from src.QA import test as qa
 
 print("Starting the main process")
 # trans_path = Path("../pages/transcription.txt")
@@ -162,7 +162,7 @@ def main(sentence):
         return shortAnswer.main(sentence)
 
     # removing neutral part of complete AND neutral sentences
-    def removeNeutral(sentence):
+    def remNeutral(sentence):
         print("removing neutral component of sentence")
         return removeNeutral.main(sentence)
 
@@ -214,44 +214,44 @@ def main(sentence):
             comb_score = getScore(comb_statement)
             if isCompleteSentence(comb_score):
                 finalMinutes[index] = [3, comb_statement]
+            inQuestion = False
             for sentence in Qbuffer[2]:
                 main(sentence)
-            inQuestion = False
-
-    if isQuestion(sentence):
-        print("Question identified")
-        inQuestion = True
-        Qbuffer = [index, sentence, []]
-    elif isShortAnswer(sentence):
-        print("Short answer identified")
-        # no need to interact here. This is considered in the question identifier section
     else:
-        score = getScore(sentence)
-        if score[2] > 0.3 and score[3] > 0.3:
-            print("Belong to complete AND neutral sentences")
-            updSent, flag = removeNeutral(sentence)
-            if flag == True:
-                updated_score = getScore(updSent)
-                if isCompleteSentence(updated_score):
-                    finalMinutes[index] = [3, sentence]
-            else:
-                print("Neutral part not present or cannot be seperated from sentence")
-        elif max(score) < 0.5:
-            print("sentence cannot be classified accurately")
+        if isQuestion(sentence):
+            print("Question identified")
+            inQuestion = True
+            Qbuffer = [index, sentence, []]
+        elif isShortAnswer(sentence):
+            print("Short answer identified")
+            # no need to interact here. This is considered in the question identifier section
         else:
-            max_index = score.index(max(score))
-            print("sentence belongs to : " + str(max_index))
-            if max_index == 2:
-                print("Useful sentence")
-                finalMinutes[index] = [3, sentence]
-            elif max_index == 1:
-                print("Positive Answer")
-                finalMinutes[index] = [1, sentence]
-            elif max_index == 0:
-                print("Negative Answer")
-                finalMinutes[index] = [0, sentence]
+            score = getScore(sentence)
+            if score[2] > 0.3 and score[3] > 0.3:
+                print("Belong to complete AND neutral sentences")
+                updSent, flag = remNeutral(sentence)
+                if flag == True:
+                    updated_score = getScore(updSent)
+                    if isCompleteSentence(updated_score):
+                        finalMinutes[index] = [3, sentence]
+                else:
+                    print("Neutral part not present or cannot be separated from sentence")
+            elif max(score) < 0.5:
+                print("sentence cannot be classified accurately")
             else:
-                print("Useless statement")
+                max_index = score.index(max(score))
+                print("sentence belongs to : " + str(max_index))
+                if max_index == 2:
+                    print("Useful sentence")
+                    finalMinutes[index] = [3, sentence]
+                elif max_index == 1:
+                    print("Positive Answer")
+                    finalMinutes[index] = [1, sentence]
+                elif max_index == 0:
+                    print("Negative Answer")
+                    finalMinutes[index] = [0, sentence]
+                else:
+                    print("Useless statement")
     index+=1
 
 

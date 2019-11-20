@@ -34,6 +34,7 @@ from google.cloud import speech_v1p1beta1 as speech
 
 import pyaudio
 from six.moves import queue
+from src import mainProcess
 
 # Audio recording parameters
 STREAMING_LIMIT = 290000
@@ -178,6 +179,7 @@ def listen_print_loop(responses, stream):
             num_chars_printed = len(transcript)
         else:
             print(transcript + overwrite_chars)
+            mainProcess.main(transcript)
             #final_transcript.append(transcript_words)
 
             # Exit recognition if any of the transcribed phrases could be
@@ -204,7 +206,7 @@ def listen_print_loop(responses, stream):
                 f = open("transcription.txt", "w+")
                 f.write(transcript_temp)
                 f.close()
-                os.system("mainProcess.py")
+                #os.system("mainProcess.py")    #for non real time scenarios
                 stream.closed = True
                 break
 
@@ -212,7 +214,7 @@ def listen_print_loop(responses, stream):
 
 
 def main():
-    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "C:/Users/RedLine/Desktop/Semester 8/FYP/FYP_2/FYP_01/key.json"
+    os.environ["GOOGLE_APPLICATION_CREDENTIALS"] = "C:/Users/RedLine/Desktop/Semester 8/FYP/FYP_final/FYP-key.json"
     client = speech.SpeechClient()
     config = speech.types.RecognitionConfig(
         encoding=speech.enums.RecognitionConfig.AudioEncoding.LINEAR16,

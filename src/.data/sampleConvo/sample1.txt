@@ -1,0 +1,9 @@
+1:Good morning Everyone. We are ready to start the meeting. Thank you all for coming. We are here to talk about the Nero Project.
+2:What is the cost of the project?
+3:Ten million.
+2:How long will the project take?
+3:Two weeks.
+2:The project will be completed in july.
+4:By the way, we need to recruit more employees.
+1:Thank you all for coming. Goodbye Everyone.
+2. Goodbye.
