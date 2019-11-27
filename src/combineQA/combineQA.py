@@ -1,10 +1,5 @@
 import spacy
 
-yn = False
-success = False
-result = ""
-nlp = spacy.load("en_core_web_sm")
-
 q1 = "What is the cost?"
 q2 = "When will the project be finished?"
 q3 = "Will the project be completed on time?"
@@ -23,13 +18,20 @@ a6 = "No"
 a7 = "Two weeks"
 a8 = "Jack and Sam"
 a9 = "At 9.00 am"
-q_s = [q3.lower(),q7.lower(),q8.lower(), q9.lower()]
-a_s = [a3.lower(),a7.lower(),a8.lower(), a9.lower()]
+q_s = [q3.lower(), q7.lower(), q8.lower(), q9.lower()]
+a_s = [a3.lower(), a7.lower(), a8.lower(), a9.lower()]
+
 
 def main(question, answer):
+    yn = False
+    success = False
+    result = ""
+    nlp = spacy.load("en_core_web_sm")
+
 
     q = question.lower()
     a = answer.lower()
+
     # docs=[]
     # for i in q:
     #     docs.append(nlp(i))
@@ -39,37 +41,34 @@ def main(question, answer):
     #         print(token.text, token.pos_, token.dep_)
 
     doc = nlp(q)
-    for token in doc:
-        print(token.text, token.pos_, token.dep_)
+    # for token in doc:
+    #     print(token.text, token.pos_, token.dep_)
 
-
-    if(doc[0].dep_ == "aux"):
+    if (doc[0].dep_ == "aux"):
         yn = True
-    print (yn)
-
+    # print (yn)
 
     verb = ""
-    for i in range (0,len(doc)-1):
+    for i in range(0, len(doc) - 1):
         if doc[i].dep_ == "ROOT":
             verb = i
-    print (verb)
-
+    #print(verb)
 
     splitq = []
     deps = []
     for token in doc:
         splitq.append(token.text.lower())
         deps.append(token.dep_.lower())
-    if(doc[-1].dep_ == "punct"):
+    if (doc[-1].dep_ == "punct"):
         del splitq[-1]
-    print(deps[1])
+    #print(deps[1])
     if "auxpass" in deps:
         verb = deps.index("auxpass")
     if yn:
         aux = splitq.pop(0)
-        if(a == "no"):
-            splitq.insert(verb-1, "not")
-        splitq.insert(verb-1, aux)
+        if (a == "no"):
+            splitq.insert(verb - 1, "not")
+        splitq.insert(verb - 1, aux)
         success = True
     # elif splitq[0] == "at" and splitq[1] == "what" and splitq[2] == "time":
     #     noun = splitq.pop(verb)
@@ -77,40 +76,40 @@ def main(question, answer):
     #     splitq = [noun] + splitq[3:] + [a]
     elif splitq[0] == "how" and splitq[1] == "many":
         if a == "one":
-            splitq = ["there", "is","a"] + splitq[2:]
+            splitq = ["there", "is", "a"] + splitq[2:]
         else:
-            splitq = ["there", "are",a] + splitq[2:]
+            splitq = ["there", "are", a] + splitq[2:]
     elif splitq[0] == "who":
         splitq = [a] + splitq[1:]
     elif splitq[0] == "what":
-        print("d0")
+        #print("d0")
         if deps[1] == "root":
-            print("d")
+            #print("d")
             wh = splitq.pop(0)
             aux = splitq.pop(0)
             splitq.append(aux)
             splitq.append(a)
             success = True
         elif "aux" in deps:
-            print("d1")
+            #print("d1")
             i = deps.index("aux")
             splitq = splitq[i:]
             aux = splitq.pop(0)
-            splitq.insert(verb-1-i, aux)
+            splitq.insert(verb - 1 - i, aux)
             splitq.append(a)
             success = True
     elif "aux" in deps:
-        print("d2")
+        #print("d2")
         i = deps.index("aux")
         splitq = splitq[i:]
         aux = splitq.pop(0)
-        splitq.insert(verb-1-i, aux)
+        splitq.insert(verb - 1 - i, aux)
         splitq.append(a)
         success = True
-    result = " ".join(splitq)+"."
-    #print(result)
-    #print(success)
+    result = " ".join(splitq) + "."
+    # print(result)
+    # print(success)
+    print('Combined sentence : ', result)
     return result
 
-
-#main(q1,a1)
+main(q1,a1)

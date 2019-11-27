@@ -19,7 +19,6 @@ from pydub import AudioSegment
 
 fname = ''
 
-
 class ProcessAudio:
     def __init__(self):
         root = Toplevel()

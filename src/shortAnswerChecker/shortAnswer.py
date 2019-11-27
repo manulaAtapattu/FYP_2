@@ -61,8 +61,6 @@ def get_phone_numbers(text):
             my_phone_numbers += phone_numbers
     return my_phone_numbers
 
-print(get_phone_numbers("My number is 0772199"))
-
 
 def get_urls(text):
     # Extract Urls
@@ -117,16 +115,23 @@ def get_file_info(raw_text):
     output['Urls'] = Urls
     output['PhoneNumbers'] = PhoneNumbers
     output['Dates'] = DateList
+    #print(output)
 
-    if NumberValues=="" and AmountList=="" and Emails=="" and Urls=="" and PhoneNumbers=="" and DateList=="":
+    if NumberValues==[] and AmountList==[] and Emails==[] and Urls==[] and PhoneNumbers==[] and DateList==[]:
+        #print("false")
         return False
     else:
+        print("True")
         return True
     #print(output)
 
 
 def main(convo):
-    return get_file_info(convo)
+    words = convo.split(" ")
+    if len(words)>4:
+        return False
+    else:
+        return get_file_info(convo)
 
 # if __name__ == '__main__':
 #     try:
@@ -145,3 +150,7 @@ def main(convo):
 #         print("Pass Valid File Name parameter")
 #         print("For Ex: python sample.py filename.txt")
 #         sys.exit()
+
+if __name__ == '__main__':
+
+    main("The project will cost 10 million.")

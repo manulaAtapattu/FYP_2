@@ -11,8 +11,11 @@ from src.QA.bert import QA
 # print(answer['answer'])
 # print(answer.keys())
 
+
 def main(q, context):
-    model = QA('src/QA/model')
+    model = QA('../src/QA/model')
+    # model = QA('model')
     answer = model.predict(context,q)
     return answer
-
+# if __name__ == '__main__':
+#     main()

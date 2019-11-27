@@ -4,10 +4,13 @@ from PIL import Image, ImageTk
 # from trainrecord import *
 # from record_module import *
 # from GMM1 import *
+import threading
 from src import RTT2 as realTimeTranscriptionInfinite
+import pages.finalMinutes as Minutes
 
 fname = ''
 inProcess = False
+minutes = Minutes
 
 class RealTimeProcess:
     def __init__(self):
@@ -85,8 +88,12 @@ class RealTimeProcess:
 
     def startProcess(self):
         stop_record_button['state'] = NORMAL
-        print("starting process")
-        realTimeTranscriptionInfinite.main()
+        print("starting processes")
+        process = threading.Thread(target=Minutes.main, args=())
+        process2 = threading.Thread(target=realTimeTranscriptionInfinite.main, args=())
+        #realTimeTranscriptionInfinite.main()
+        process.start()
+        process2.start()
 
     def stopProcess(self):
         stop_record_button['state'] = DISABLED

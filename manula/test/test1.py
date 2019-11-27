@@ -1,9 +1,4 @@
-import test3
-
-def main():
-    print("test1")
-    test3.main()
-
-
-if __name__ == '__main__':
-    main()
+Q = [1,2,3]
+a = Q[2]
+Q = []
+print(a)

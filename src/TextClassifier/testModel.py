@@ -13,7 +13,7 @@ plt.style.use('seaborn')
 MAX_NUM_WORDS     = 1200
 EMBEDDING_DIM     = 300
 #MAX_SEQ_LENGTH    = 500
-MAX_SEQ_LENGTH    = 15
+MAX_SEQ_LENGTH    = 12
 USE_GLOVE         = True
 #KERNEL_SIZES      = [3,4,5]
 KERNEL_SIZES      = [2,3]
@@ -83,45 +83,66 @@ def read_files(path):
 
 def main(convo):
 
-    negative_docs = read_files('TextClassifier/data/fyp/train/negative.txt')
-    positive_docs = read_files('TextClassifier/data/fyp/train/positive.txt')
-    complete_docs = read_files('TextClassifier/data/fyp/train/complete.txt')
-    neutral_docs = read_files('TextClassifier/data/fyp/train/neutral.txt')
+    print("starting classification")
+    import time
 
-    arr = [negative_docs,positive_docs,complete_docs,neutral_docs]
-    maxLength = int(max([len(i) for i in arr]))
-    adjustments = []
-    for j in arr:
-        adjustments.append(int(maxLength/len(j)))
+    start = time.process_time()
+    # when running locally
+    # negative_docs = read_files('data/fyp/train/negative.txt')
+    # positive_docs = read_files('data/fyp/train/positive.txt')
+    # complete_docs = read_files('data/fyp/train/complete.txt')
+    # neutral_docs = read_files('data/fyp/train/neutral.txt')
 
-    negative_docs *=adjustments[0]
-    positive_docs *=adjustments[1]
-    complete_docs *=adjustments[2]
-    neutral_docs *=adjustments[3]
+    # negative_docs = read_files('../src/TextClassifier/data/fyp/train/negative.txt')
+    # positive_docs = read_files('../src/TextClassifier/data/fyp/train/positive.txt')
+    # complete_docs = read_files('../src/TextClassifier/data/fyp/train/complete.txt')
+    # neutral_docs = read_files('../src/TextClassifier/data/fyp/train/neutral.txt')
 
-    docs   = negative_docs + positive_docs + complete_docs + neutral_docs
 
-    X_test2 = convo #array  if input strings to classify
+    # arr = [negative_docs,positive_docs,complete_docs,neutral_docs]
+    # maxLength = int(max([len(i) for i in arr]))
+    # adjustments = []
+    # for j in arr:
+    #     adjustments.append(int(maxLength/len(j)))
+    #
+    # negative_docs *=adjustments[0]
+    # positive_docs *=adjustments[1]
+    # complete_docs *=adjustments[2]
+    # neutral_docs *=adjustments[3]
+    #
+    # docs   = negative_docs + positive_docs + complete_docs + neutral_docs
+    #
+    # tokenizer = keras.preprocessing.text.Tokenizer(num_words=MAX_NUM_WORDS)
+    # tokenizer.fit_on_texts(docs)
 
-    tokenizer = keras.preprocessing.text.Tokenizer(num_words=MAX_NUM_WORDS)
-    tokenizer.fit_on_texts(docs)
     # sequences = tokenizer.texts_to_sequences(docs)
 
-    word_index = tokenizer.word_index
-    sequences_test = tokenizer.texts_to_sequences(X_test2)
-    X_test_word = keras.preprocessing.sequence.pad_sequences(sequences_test, maxlen=MAX_SEQ_LENGTH, padding='post')
+    # word_index = tokenizer.word_index
+
+    import pickle
+    # #code used to save tokenizer using pickle
+    # with open('tokenizer.pickle', 'wb') as handle:
+    #     pickle.dump(tokenizer, handle, protocol=pickle.HIGHEST_PROTOCOL)
+
+    #loading tockneizer using pickle
+    with open('../src/TextClassifier/tokenizer.pickle', 'rb') as handle:
+        tokenizer = pickle.load(handle)
 
 
-    X_test = X_test_word
+    sequences_test = tokenizer.texts_to_sequences(convo)
+    X_test = keras.preprocessing.sequence.pad_sequences(sequences_test, maxlen=MAX_SEQ_LENGTH, padding='post')
+
 
     test_loss = []
     test_accs = []
-    model_path = Path('TextClassifier/model-4.h5')
+    #model_path = Path('model-4.h5')            # when testing locally
+    model_path = Path('../src/TextClassifier/model-4.h5')
     cnn_ = keras.models.load_model(model_path)
     score = cnn_.predict(X_test)
     print('score', score)
+    print("time taken : ", time.process_time()-start)
     return score
 
 if __name__ == '__main__':
 
-    main()
+    main(["Good morning"])

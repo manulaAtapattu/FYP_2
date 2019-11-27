@@ -1,19 +1,3 @@
-#!/usr/bin/env python
-
-# Copyright 2018 Google LLC
-#
-# Licensed under the Apache License, Version 2.0 (the "License");
-# you may not use this file except in compliance with the License.
-# You may obtain a copy of the License at
-#
-#      http://www.apache.org/licenses/LICENSE-2.0
-#
-# Unless required by applicable law or agreed to in writing, software
-# distributed under the License is distributed on an "AS IS" BASIS,
-# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-# See the License for the specific language governing permissions and
-# limitations under the License.
-
 """Google Cloud Speech API sample application using the streaming API.
 NOTE: This module requires the additional dependency `pyaudio`. To install
 using pip:
@@ -41,6 +25,7 @@ STREAMING_LIMIT = 290000
 SAMPLE_RATE = 16000
 final_transcript=[]
 CHUNK_SIZE = int(SAMPLE_RATE / 10)  # 100ms
+#Minutes = None
 
 
 def get_current_time():
@@ -179,7 +164,9 @@ def listen_print_loop(responses, stream):
             num_chars_printed = len(transcript)
         else:
             print(transcript + overwrite_chars)
+            #global Minutes
             mainProcess.main(transcript)
+            #Minutes.updateStart(transcript)
             #final_transcript.append(transcript_words)
 
             # Exit recognition if any of the transcribed phrases could be
@@ -245,6 +232,6 @@ def main():
             listen_print_loop(responses, stream)
 
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()
 # [END speech_transcribe_infinite_streaming]
