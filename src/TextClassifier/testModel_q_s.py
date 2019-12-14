@@ -3,6 +3,8 @@ import numpy as np
 import os
 import re
 import string
+# import os
+# os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 import keras
 from pathlib import Path
 
@@ -81,6 +83,7 @@ def read_files(path):
 
 
 def main(convo):
+
     # question and statement classifier
     # questions = read_files('../src/TextClassifier/data/q_s/train/questions.txt')
     # statements = read_files('../src/TextClassifier/data/q_s/train/statements.txt')
@@ -113,7 +116,9 @@ def main(convo):
     test_loss = []
     test_accs = []
     #model_path = Path('model_q_s.h5')       #for local testing
-    model_path = Path('../src/TextClassifier/model_q_s.h5')
+    #model_path = Path('../src/TextClassifier/model_q_s.h5')    #for previous keras versions
+    model_path = '../src/TextClassifier/model_q_s.h5'
+
 
     cnn_ = keras.models.load_model(model_path)
     score = cnn_.predict(X_test)

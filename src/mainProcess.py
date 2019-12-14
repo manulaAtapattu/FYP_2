@@ -1,16 +1,22 @@
 # main process file in automatic minute maker
 # reeds from the transcription.txt file and feeds each line into the deep learning models
 # final output will be of the minutes
+# arr[index] => indexes -> 0 - not processed yet, 1 - useful,
+# 2 - Positive answer, 3 - negative answer, 4 - useless,
+# 5 - short answer, -2 - useless question, -1 = question
 
-from pathlib import Path
 from src.TextClassifier import testModel, testModel_q_s
-# from src.Qidentifier import QItest
+from src.TextClassifier.BERT import run_classifier
 from src.shortAnswerChecker import shortAnswer
 from src.combineQA import combineQA
 from src.removeNeutral import removeNeutral
 from src.QA import test as qa
-import pages.finalMinutes as Minutes
+from src.QuestionType import questionType
+
+from pages import realTimeProcess as RTP
+# import pages.finalMinutes as Minutes
 import numpy as np
+import time
 
 # convo_length = len(convo)
 questions = []
@@ -25,18 +31,28 @@ MAX_CONVO_LENGTH = 50
 finalMinutes = [None] * MAX_CONVO_LENGTH
 minute_entry = []
 inQuestion = False
-Qbuffer = []
+# inputSentences = [None] * MAX_CONVO_LENGTH
+# usefulSentences = [True] * MAX_CONVO_LENGTH
+# completedIndexes = [None] * MAX_CONVO_LENGTH
+q_buffer = []
+q_type = None
 
-index = 0
+
+# index = 0
 
 
-def main(sentence):
-    print("Starting the main process")
+def main(sentence, index, arr):
+    # print("Starting the main process in index ", index, ' and sentence ', sentence)
 
-    global index
+    # global index
     global finalMinutes
     global inQuestion
-    global Qbuffer
+    global q_buffer
+    global q_type
+
+    # global inputSentences
+
+    # inputSentences[index] = sentence
 
     # function to identify questions
     def isQuestion(sentence):
@@ -78,9 +94,8 @@ def main(sentence):
         print('a : ', answer)
         return combineQA.main(question, answer)
 
-    def getScore(statement):
-        print("calculating statement score")
-        return testModel.main([statement])
+    def getScore(statement, index):
+        return run_classifier.main(statement, index)  # using BERT
 
     def createMinute(index, statement):
         print("Adding item to minutes")
@@ -96,66 +111,81 @@ def main(sentence):
         sentence = sentence.lstrip()
         return sentence
 
-    #sentence = preprocessSent(sentence)
-    if inQuestion == True:
-        print('in question...')
-        # Qbuffer = [index, question, [answers] ]
-        print('adding to Qbuffer')
-        Qbuffer[2].append(sentence)
-        if len(Qbuffer[2]) != 3:
-            return
-        else:
-            print('added Qbuffer to maximum capacity')
-            answer = findAnswer2(index, Qbuffer[1], Qbuffer[2])
-            print('answer : ', answer)
-            comb_statement = combineAnswer(Qbuffer[1], answer['answer'])
-            print("comb_statement : ", comb_statement)
-            # calculating usefullness of considered options
-            inQuestion = False
-            answers = Qbuffer[2]
-            Qbuffer = []
-            main(comb_statement)
-            for sentence in answers:
-                if answer['answer'] in sentence:
-                    continue
-                main(sentence)
+    def QuestionType(sentence):
+        return questionType.main(sentence)
+
+    # sentence = preprocessSent(sentence)
+    # while True:
+    #     if inQuestion == True:
+    #         print('Wait till answer to latest question is calculated ... ')
+    #         time.sleep(2)
+    #     else:
+    #         break
+    if isQuestion(sentence):
+        # check if useless question
+        print("Question identified")
+        arr[index] = -1
+
+    elif isShortAnswer(sentence):
+        print("Short answer identified")
+        arr[index] = 5
+        # no need to interact here. This is considered in the question identifier section
     else:
-        if isQuestion(sentence):
-            # print("Question identified")
-            inQuestion = True
-            Qbuffer = [index, sentence, []]
-        elif isShortAnswer(sentence):
-            print("Short answer identified")
-            # no need to interact here. This is considered in the question identifier section
-        else:
-            score = getScore(sentence)
-            score = score[0]
-            if score[2] > 0.3 and score[3] > 0.3:
-                print("Belong to complete AND neutral sentences")
-                updSent, flag = remNeutral(sentence)
-                if flag == True:
-                    updated_score = getScore(updSent)
-                    if isCompleteSentence(updated_score):
-                        finalMinutes[index] = [index, 3, sentence, False]
-                else:
-                    print("Neutral part not present or cannot be separated from sentence")
-            elif max(score) < 0.5:
-                print("sentence cannot be classified accurately")
+        score = getScore(sentence, index)
+        # from pages.realTimeProcess import keywords
+        # if keyword is in sentence => increase complete/useful sentence score
+        if RTP.keywords != None:
+            for kw in RTP.keywords:
+                if kw in sentence:
+                    print("keyword in sentence")
+                    score[0] = score[0] * 1.3
+
+        # score = score[0]       # comment when using BERT
+        if score[0] > 0.25 and score[3] > 0.25:
+            print("Belong to complete AND neutral sentences")
+            updSent, flag = remNeutral(sentence)
+            if flag == True:
+                updated_score = getScore(updSent)
+                if isCompleteSentence(updated_score):
+                    finalMinutes[index] = [index, 0, sentence, False]
             else:
-                max_index = list(score).index(max(score))
-                print("sentence belongs to : " + str(max_index))
-                if max_index == 2:
-                    print("Useful sentence")
-                    minute_entry = [index, 3, sentence, False]
-                    Minutes.updateStart(sentence + ":" + str(index))
-                elif max_index == 1:
-                    print("Positive Answer")
-                    minute_entry = [index, 1, sentence, False]
-                    Minutes.updateStart(sentence + ":" + str(index))
-                elif max_index == 0:
-                    print("Negative Answer")
-                    minute_entry = [index, 0, sentence, False]
-                    Minutes.updateStart(sentence + ":" + str(index))
-                else:
-                    print("Useless statement")
-    index += 1
+                print("Neutral part not present or cannot be separated from sentence")
+        elif score[0] > 0.25 and score[1] > 0.25:
+            print("identified complete and positive sentence")
+        elif score[0] > 0.25 and score[2] > 0.25:
+            print("identified complete and negative sentence")
+        elif max(score) < 0.5:
+            print("sentence cannot be classified accurately")
+        else:
+            max_index = list(score).index(max(score))
+            if max_index == 0:
+                print("Useful sentence ", sentence)
+                minute_entry = [index, 0, sentence, False]
+                arr[index] = 1
+                #print("arr in MP: ", arr[:])
+                # while True:
+                #     if index == 0 or (completedIndexes[index - 1] == True and usefulSentences[index] == True):
+                #         Minutes.updateStart(sentence + ":" + str(index))
+                #         completedIndexes[index] = True
+                #         break
+                #     else:
+                #         time.sleep(1)
+            elif max_index == 1:
+                #print("Positive Answer")
+                minute_entry = [index, 1, sentence, False]
+                arr[index] = 2
+
+            elif max_index == 2:
+                #print("Negative Answer")
+                minute_entry = [index, 2, sentence, False]
+                arr[index] = 3
+
+            else:
+                #print("Useless statement")
+                arr[index] = 4
+                # usefulSentences[index] = False
+                # completedIndexes[index] = True
+
+    # completedIndexes[index] = True
+    print("completed index", index)
+    return 0

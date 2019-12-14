@@ -1,4 +1,8 @@
-Q = [1,2,3]
-a = Q[2]
-Q = []
-print(a)
+import multiprocessing
+i = 2
+
+def main():
+    i += 1
+    print(i)
+
+main()

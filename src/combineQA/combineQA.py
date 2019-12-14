@@ -112,4 +112,4 @@ def main(question, answer):
     print('Combined sentence : ', result)
     return result
 
-main(q1,a1)
+#main("What is the cost of construction project?","10 million")

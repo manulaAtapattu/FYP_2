@@ -1,34 +1,23 @@
-# from pages.processAudio import *
-# from pages.realTimeProcess import *
-from tkinter import *
-from PIL import Image, ImageTk
+# Conversation page
+# page to show full conversation when the mminutes are done in real time
+
+from pages.processAudio import *
+from pages.realTimeProcess import *
 from datetime import datetime
 import time
 from src import RTT2 as realTimeTranscriptionInfinite
-from pages.createMinutes import Conversation
 import multiprocessing
+from multiprocessing.managers import BaseManager
 
 index = 0
 q = None
 root = None
-convo = None
-q_convo = None
 
 
+# root = None
 
-class Minutes:
 
-    def updateStart(self, text):
-        global root
-        print("new root : ", root)
-        if root != None:
-            print("root finally updated")
-            root.after(2000, self.updateMinute(text))
-        else:
-            import time
-            print("root not updated....")
-            time.sleep(0.5)
-            self.updateStart(text)
+class Conversation:
 
     def highlight_searched(self, *args):
         global all_listbox_items
@@ -46,47 +35,24 @@ class Minutes:
             myList.selection_clear(0, END)
             # root.after(1000,highlight_searched())
 
-    def startProcess(self):
-        global root
-        global q
-        stop_process = False
-        # print("starting Minute startProcess")
-        if not q.empty():
-            print("not empty q")
-            speaker_tag = q.get()
-            while not q.empty:
-                time.sleep(1)
-            text = q.get()
-            text = speaker_tag + text
-            if text == "stop recording":
-                stop_process = True
-            global myList
-            t = time.localtime()
-            current_time = time.strftime("%H:%M:%S", t)
-            myList.insert(ANCHOR, current_time, text)
-            myList.yview(END)
-        if stop_process == False:
-            root.after(2000, self.startProcess)
-        else:
-            print("StartProcess is Stopped....")
-
-    def main(self, real_time=True, file_path=None):
+    def main(self):
         print("Creating minute page  ... ")
         global root
         root = Toplevel()
-        root.title("The Minute")
+        print("initial root : ", root)
+        root.title("The Conversation")
         width = root.winfo_screenwidth()
         height = root.winfo_screenheight()
         root.geometry("%dx%d" % (width, height))
         root.state('zoomed')
 
-        # image = Image.open('C:/Users/RedLine/Desktop/Semester 8/FYP/FYP_final/images/homepage.jpg')
-        #
-        # global copy_of_image
-        # copy_of_image = image.copy()
-        # photo = ImageTk.PhotoImage(image)
-        # label = Label(root, image=photo)
-        # label.place(x=0, y=0, relwidth=1, relheight=1)
+        image = Image.open('C:/Users/RedLine/Desktop/Semester 8/FYP/FYP_final/images/homepage.jpg')
+
+        global copy_of_image
+        copy_of_image = image.copy()
+        photo = ImageTk.PhotoImage(image)
+        label = Label(root, image=photo)
+        label.place(x=0, y=0, relwidth=1, relheight=1)
 
         user_label = Label(root, bg="black", fg="white", text="The Minute")
         user_label.config(font=("Courier", 50, 'bold'))
@@ -107,18 +73,6 @@ class Minutes:
 
         search_button = Button(root, text="Go:", bg="pink", fg="black")
         search_button.place(x=870, y=100, width=50, height=25)
-
-        def show_convo():
-            global q_convo
-            global convo
-            print("Showing Full Minutes")
-            convo.main(q_convo)
-
-
-        show_conversation_button = Button(root, fg="white", background="#9E5B37", activebackground="#BC7F5E",
-                                          font=("Courier", 18, 'bold'), activeforeground="white",
-                                          text='Show Full Minutes', padx=15, pady=15, command=show_convo)
-        show_conversation_button.place(relx=0.88, rely=0.7, anchor=CENTER)
 
         quit_button = Button(root, fg="white", background="red", activebackground="red",
                              font=("Helvetica", 20, 'bold italic'), text='BACK', padx=10, pady=10)
@@ -142,22 +96,5 @@ class Minutes:
         scrollbar.config(command=myList.yview)
         scrollbar.config(command=myList.see("end"))
 
-        global q
-        global q_convo
-        global convo
-        convo = Conversation()
-        q = multiprocessing.Queue()  # queue to update interface
-        q_convo = multiprocessing.Queue()  # queue to update full conversation page
-
-        thread_1 = multiprocessing.Process(target=realTimeTranscriptionInfinite.main, args=(q, q_convo, real_time, file_path,))
-        #thread_2 = multiprocessing.Process(target=convo.main, args=(q_convo,))
-
-        thread_1.start()
-        #thread_2.start()
-
-        print("starting Minute startProcess")
-        self.startProcess()
-#
 # if __name__ == '__main__':
 #     minutePage = Minutes()
-# minutePage.main()

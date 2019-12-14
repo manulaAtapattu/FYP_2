@@ -1,5 +1,3 @@
-Speaker1 : Good morning
-Speaker2 : First of all, the meeting is cancelled. Thank you for coming. Goodbye Everyone.
-Speaker1 : Okay
-Speaker3 : By the way, the project is progressing well
-Speaker2 : Nice of you to mention
+speaker 1: 
+speaker 2: Good morning.
+speaker 1: Thank you for coming. the protective 10 million stop recording

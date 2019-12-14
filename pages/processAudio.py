@@ -8,16 +8,20 @@ import pyaudio
 import pickle
 from sklearn.mixture import GaussianMixture
 import scipy.io.wavfile as wav
+from pages.finalMinutes import Minutes
+import src.Non_RTT as process
 import statistics as stat
 import numpy as np
 import datetime
-from pydub import AudioSegment
 
 # from trainrecord import *
 # from record_module import *
 # from GMM1 import *
+#from pages.finalMinutes import Minutes
 
 fname = ''
+keywords = None
+minutes = None
 
 class ProcessAudio:
     def __init__(self):
@@ -46,15 +50,23 @@ class ProcessAudio:
         user_label.config(font=("Courier", 30))
         user_label.place(relx=0.35, rely=0.4, anchor='w')
 
-        rec_button = Button(root, text="Attach audio file", bg="white", fg="black", font=("Courier", 20, 'italic'), command=self.attach_file)
-        rec_button.place(relx=0.6, rely=0.4, anchor=CENTER)
+        attach_button = Button(root, text="Attach audio file", bg="white", fg="black", font=("Courier", 20, 'italic'), command=self.attach_file)
+        attach_button.place(relx=0.6, rely=0.4, anchor=CENTER)
 
+
+        # keywords input box
+        # these keywords will be given a higher weight
+        user_label = Label(root, fg="black", text="Enter Keywords : Keywords should be separated by a comma",
+                           font=("Courier", 15, 'bold'))
+        user_label.place(relx=0.18, rely=0.32, anchor='w')
+        input_box = Entry(root, bg="#CA6F1E", fg="white", font=("Courier", 20, 'bold'), width=40)
+        input_box.place(relx=0.4, rely=0.5, anchor=CENTER)
 
         ## Adding Buttons
 
-        process_button = Button(root, text="Process", bg="#CA6F40", fg="white", font=("Courier", 35), command=self.process)
+        process_button = Button(root, text="Process", bg="#CA6F40", fg="white", font=("Courier", 35),
+                                command=self.process(input_box))
         process_button.place(relx=0.4, rely=0.6, anchor=CENTER)
-
 
     ## Class for a placeholder
 
@@ -145,18 +157,18 @@ class ProcessAudio:
             comp_name = wav_file.getcompname()  # Compression name.
             frames = wav_file.readframes(n_frames)  # Read n_frames new frames.
 
-            with wave.open("training_data\\inputAudio.wav", "wb") as wav_file:  # Open WAV file in write-only mode.
+            with wave.open("..\\data\\inputAudio.wav", "wb") as wav_file:  # Open WAV file in write-only mode.
                 # Write audio data.
                 params = (n_channels, sample_width, framerate, n_frames, comp_type, comp_name)
                 wav_file.setparams(params)
                 wav_file.writeframes(frames)
 
         # training created file 'inputAudio'
-        self.trainAudio()
+        # self.trainAudio()
 
 
     def trainAudio(self):
-        source = 'training_data/'
+        source = '../data/'
         path = 'inputAudio.wav'
         dest = 'models/'
 
@@ -178,9 +190,17 @@ class ProcessAudio:
                 Sum += arr2 ** 2
         return Sum.sum()
 
-    def process(self):
+    def process(self, input_box):
         #get AudioFile for processing
-        print('Start processing audio file')
+        print('Start processing existing audio file')
+        global keywords
+        # global minutes
+        keywords = (input_box.get()).split(',')
+        print("keywords : ", keywords)
+        global minutes
+        minutes = Minutes()
+        minutes.main(real_time=False)
+
 
         # obj = wave.open('training_data/inputAudio.wav', 'r')
         # nframes = obj.getnframes()
@@ -189,63 +209,63 @@ class ProcessAudio:
         # print('framerate : ', framerate, '| type : ', type(framerate))
         # return
 
-        rate, sig = wav.read('training_data/inputAudio.wav')
-        print('Length of Audio : ', len(sig), ' | sample rate : ', rate)
-
-        speakerNo = 0
-        speakerModels = []
-        scoreList = []
-        power_spectrum_list = []
-        varience_list = []
-        i = 0
-        while i < len(sig):
-            # print(sig[i])
-            # i+=10
-            # if i>(len(sig)-1):
-            #     break
-            # else:
-            #     continue
-            if abs(sig[i])>=1500:
-                print('sound identified')
-                temp_mean = stat.mean(abs(sig[i:i + 8000]))
-                print ('mean : ',temp_mean)
-                if temp_mean>650:
-                    print ('sound identified as voice')
-                    tempRate = rate
-                    tempSig = sig[i:i + 15000]
-                    self.writeAudio(tempRate, tempSig, i)
-                    #print('Created partition ...')
-
-                    i += 15001
-                    if speakerNo == 0:
-                        print ('Adding first speaker')
-                        frames = processing.stack_frames(tempSig, sampling_frequency=tempRate,
-                                                         frame_length=0.020,
-                                                         frame_stride=0.01,
-                                                         filter=lambda x: np.ones((x,)),
-                                                         zero_padding=True)
-                        power_spectrum = processing.power_spectrum(frames, fft_points=512)
-                        power_spectrum_list.append(power_spectrum)
-                        speakerNo = 1
-                    else :
-                        frames = processing.stack_frames(tempSig, sampling_frequency=tempRate,
-                                                         frame_length=0.020,
-                                                         frame_stride=0.01,
-                                                         filter=lambda x: np.ones((x,)),
-                                                         zero_padding=True)
-                        power_spectrum = processing.power_spectrum(frames, fft_points=512)
-                        for ps in power_spectrum_list:
-                            PSdif = ps - power_spectrum
-                            variance = self.getSquareArray_1by2(PSdif)
-                            print('Power Spectrum variance : ', variance)
-
-                            if variance > 2.2 * (10**20):
-                                power_spectrum_list.append(power_spectrum)
-                                print('Adding Speaker')
-                                speakerNo+=1
-                                break
-
-            print('progress', i, '/', len(sig),' | signal strength : ', sig[i])
-            i+=100
-        print('Number of Speakers : ', speakerNo)
-        print('\nProcess completed at time : ', datetime.datetime.now())
+        # rate, sig = wav.read('training_data/inputAudio.wav')
+        # print('Length of Audio : ', len(sig), ' | sample rate : ', rate)
+        #
+        # speakerNo = 0
+        # speakerModels = []
+        # scoreList = []
+        # power_spectrum_list = []
+        # varience_list = []
+        # i = 0
+        # while i < len(sig):
+        #     # print(sig[i])
+        #     # i+=10
+        #     # if i>(len(sig)-1):
+        #     #     break
+        #     # else:
+        #     #     continue
+        #     if abs(sig[i])>=1500:
+        #         print('sound identified')
+        #         temp_mean = stat.mean(abs(sig[i:i + 8000]))
+        #         print ('mean : ',temp_mean)
+        #         if temp_mean>650:
+        #             print ('sound identified as voice')
+        #             tempRate = rate
+        #             tempSig = sig[i:i + 15000]
+        #             self.writeAudio(tempRate, tempSig, i)
+        #             #print('Created partition ...')
+        #
+        #             i += 15001
+        #             if speakerNo == 0:
+        #                 print ('Adding first speaker')
+        #                 frames = processing.stack_frames(tempSig, sampling_frequency=tempRate,
+        #                                                  frame_length=0.020,
+        #                                                  frame_stride=0.01,
+        #                                                  filter=lambda x: np.ones((x,)),
+        #                                                  zero_padding=True)
+        #                 power_spectrum = processing.power_spectrum(frames, fft_points=512)
+        #                 power_spectrum_list.append(power_spectrum)
+        #                 speakerNo = 1
+        #             else :
+        #                 frames = processing.stack_frames(tempSig, sampling_frequency=tempRate,
+        #                                                  frame_length=0.020,
+        #                                                  frame_stride=0.01,
+        #                                                  filter=lambda x: np.ones((x,)),
+        #                                                  zero_padding=True)
+        #                 power_spectrum = processing.power_spectrum(frames, fft_points=512)
+        #                 for ps in power_spectrum_list:
+        #                     PSdif = ps - power_spectrum
+        #                     variance = self.getSquareArray_1by2(PSdif)
+        #                     print('Power Spectrum variance : ', variance)
+        #
+        #                     if variance > 2.2 * (10**20):
+        #                         power_spectrum_list.append(power_spectrum)
+        #                         print('Adding Speaker')
+        #                         speakerNo+=1
+        #                         break
+        #
+        #     print('progress', i, '/', len(sig),' | signal strength : ', sig[i])
+        #     i+=100
+        # print('Number of Speakers : ', speakerNo)
+        # print('\nProcess completed at time : ', datetime.datetime.now())

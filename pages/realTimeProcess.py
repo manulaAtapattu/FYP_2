@@ -1,16 +1,18 @@
 from tkinter import *
-from tkinter import ttk
 from PIL import Image, ImageTk
 # from trainrecord import *
 # from record_module import *
 # from GMM1 import *
 import threading
-from src import RTT2 as realTimeTranscriptionInfinite
-import pages.finalMinutes as Minutes
+# from src import RTT2 as realTimeTranscriptionInfinite
+#from pages.finalMinutes import Minutes
+
 
 fname = ''
 inProcess = False
-minutes = Minutes
+keywords = None
+minutes = None
+
 
 class RealTimeProcess:
     def __init__(self):
@@ -35,14 +37,22 @@ class RealTimeProcess:
 
         ## Adding Buttons
 
-        global stop_record_button
-        stop_record_button = Button(root, text="Stop", bg="#CA6F1E", fg="white", font=("Courier", 30, 'bold'), command=lambda : self.stopProcess(), state=DISABLED)
-        stop_record_button.place(relx=0.7, rely=0.6, anchor=CENTER)
+        # global stop_record_button
+        # stop_record_button = Button(root, text="Stop", bg="#CA6F1E", fg="white", font=("Courier", 30, 'bold'), command=lambda : self.stopProcess(), state=DISABLED)
+        # stop_record_button.place(relx=0.7, rely=0.6, anchor=CENTER)
 
+        # start recording button
         rec_button = Button(root, text="Start", bg="#CA6F1E", fg="white", font=("Courier", 30, 'bold'))
-        rec_button.config(command=lambda : self.startProcess())
+        rec_button.config(command=lambda: self.startProcess(input_box))
         rec_button.place(relx=0.4, rely=0.6, anchor=CENTER)
 
+        # keywords input box
+        # these keywords will be given a higher weight
+        user_label = Label(root, fg="black", text="Enter Keywords : Keywords should be separated by a comma",
+                           font=("Courier", 15, 'bold'))
+        user_label.place(relx=0.18, rely=0.32, anchor='w')
+        input_box = Entry(root, bg="#CA6F1E", fg="white", font=("Courier", 20, 'bold'), width=40)
+        input_box.place(relx=0.4, rely=0.4, anchor=CENTER)
 
     ## Class for a placeholder
 
@@ -85,17 +95,24 @@ class RealTimeProcess:
         label.config(image=photo)
         label.image = photo
 
-
-    def startProcess(self):
-        stop_record_button['state'] = NORMAL
+    def startProcess(self, input_box):
+        # stop_record_button['state'] = NORMAL
         print("starting processes")
-        process = threading.Thread(target=Minutes.main, args=())
-        process2 = threading.Thread(target=realTimeTranscriptionInfinite.main, args=())
+        global keywords
+        #global minutes
+        keywords = (input_box.get()).split(',')
+        print("keywords : ", keywords)
+        #global minutes
+        minutes = Minutes()
+        minutes.main()
         #realTimeTranscriptionInfinite.main()
-        process.start()
-        process2.start()
+        #process = threading.Thread(target=minutes.main, args=())
+        #process2 = threading.Thread(target=realTimeTranscriptionInfinite.main, args=())
+        # realTimeTranscriptionInfinite.main()
+        # process.start()
+        # process2.start()
 
-    def stopProcess(self):
-        stop_record_button['state'] = DISABLED
-        realTimeTranscriptionInfinite.stop_process()
+    # def stopProcess(self):
+        # stop_record_button['state'] = DISABLED
+        #realTimeTranscriptionInfinite.stop_process()
 
