@@ -13,7 +13,7 @@ q = None
 root = None
 convo = None
 q_convo = None
-
+mylist_index = -1
 
 
 class Minutes:
@@ -49,14 +49,19 @@ class Minutes:
     def startProcess(self):
         global root
         global q
+        global mylist_index
         stop_process = False
         # print("starting Minute startProcess")
         if not q.empty():
             print("not empty q")
             speaker_tag = q.get()
+            mylist_index += 1
             while not q.empty:
                 time.sleep(1)
-            text = q.get()
+            info = q.get()      #  in format [sentence, sentence_type]
+            mylist_index += 1
+            text = info[0]
+            tag = info[1]
             text = speaker_tag + text
             if text == "stop recording":
                 stop_process = True
@@ -65,6 +70,10 @@ class Minutes:
             current_time = time.strftime("%H:%M:%S", t)
             myList.insert(ANCHOR, current_time, text)
             myList.yview(END)
+            if tag == 2:
+                myList.itemconfig(mylist_index, {'fg': 'green'})
+            elif tag == 3:
+                myList.itemconfig(mylist_index, {'fg': 'red'})
         if stop_process == False:
             root.after(2000, self.startProcess)
         else:

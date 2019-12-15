@@ -141,13 +141,14 @@ def main(sentence, index, arr):
                     score[0] = score[0] * 1.3
 
         # score = score[0]       # comment when using BERT
-        if score[0] > 0.25 and score[3] > 0.25:
+        if score[0] > 0.25 and score[3] > 0.2:
             print("Belong to complete AND neutral sentences")
             updSent, flag = remNeutral(sentence)
             if flag == True:
                 updated_score = getScore(updSent)
                 if isCompleteSentence(updated_score):
                     finalMinutes[index] = [index, 0, sentence, False]
+                    arr[index] = 1
             else:
                 print("Neutral part not present or cannot be separated from sentence")
         elif score[0] > 0.25 and score[1] > 0.25:

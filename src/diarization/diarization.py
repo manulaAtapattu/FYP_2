@@ -70,5 +70,5 @@ def sample_long_running_recognize(storage_uri):
     f.close()
 
 s = time.time()
-sample_long_running_recognize("gs://fyp_1/BEP313-Scrum-Meetings1_1.wav")
+sample_long_running_recognize("gs://fyp_1/BEP220-Arguing2.wav")
 print(s - time.time())

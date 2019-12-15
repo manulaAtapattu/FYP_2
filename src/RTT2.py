@@ -307,13 +307,15 @@ def calculation(arr, queueQA, queueTranscripts, queueSpeakerTags, mainQueue, sto
         if tempArr[index] == 1:
             print("Adding Useful statement  : ", sentence)
             mainQueue.put("person " + str(speaker_tag) + " : ")
-            mainQueue.put(sentence)
+            mainQueue.put([sentence,1])
         elif tempArr[index] == 2:
+            mainQueue.put("person " + str(speaker_tag) + " : ")
             print("Positive response : ", sentence)
-            mainQueue.put(sentence)
+            mainQueue.put([sentence,2])
         elif tempArr[index] == 3:
+            mainQueue.put("person " + str(speaker_tag) + " : ")
             print("Negative response : ", sentence)
-            mainQueue.put(sentence)
+            mainQueue.put([sentence, 3])
         elif tempArr[index] == 4:
             print("useless statement : ", sentence)
         elif tempArr[index] == 5:
@@ -360,9 +362,10 @@ def calculation(arr, queueQA, queueTranscripts, queueSpeakerTags, mainQueue, sto
                                                     answer['answer'])  # combining answer and question
                     print("comb_statement : ", comb_statement)
                     # calculating usefullness of considered options
-                    mainProcess.main(comb_statement, index, arr, queueQA)
+                    mainProcess.main(comb_statement, index, arr)
                     if arr[index] == 1:
-                        mainQueue.put(comb_statement)
+                        mainQueue.put("person " + str(speaker_tag) + " : ")
+                        mainQueue.put([comb_statement,1])
                     r_i = 1
                     for sentence in answers:
                         if answer['answer'] in sentence:
@@ -372,7 +375,8 @@ def calculation(arr, queueQA, queueTranscripts, queueSpeakerTags, mainQueue, sto
                         # main(sentence)
             for i in range(0, 3):
                 if arr[index + i + 1] == 1:
-                    mainQueue.put(q_buffer[2][i])
+                    mainQueue.put("person " + str(speaker_tag) + " : ")
+                    mainQueue.put([q_buffer[2][i],1])
                 if i == 2:
                     index += 3
 
@@ -466,7 +470,7 @@ def listen_print_loop(responses, stream):
                 queueSpeakerTags.put(transcript[1])
                 q_convo.put(transcript[0])
                 q_convo.put("person " + str(transcript[1]) + " : ")
-                thread = multiprocessing.Process(target=mainProcess.main, args=(transcript[0], index, arr, queueQA,))
+                thread = multiprocessing.Process(target=mainProcess.main, args=(transcript[0], index, arr,))
                 thread.start()
                 # queueThread.put(thread)
                 # threadList.append(thread)

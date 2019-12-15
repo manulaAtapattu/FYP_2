@@ -8,7 +8,7 @@ import pyaudio
 import pickle
 from sklearn.mixture import GaussianMixture
 import scipy.io.wavfile as wav
-from pages.finalMinutes import Minutes
+# from pages.finalMinutes import Minutes
 import src.Non_RTT as process
 import statistics as stat
 import numpy as np

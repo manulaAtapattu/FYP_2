@@ -5,7 +5,7 @@ from PIL import Image, ImageTk
 # from GMM1 import *
 import threading
 # from src import RTT2 as realTimeTranscriptionInfinite
-#from pages.finalMinutes import Minutes
+from pages.finalMinutes import Minutes
 
 
 fname = ''
